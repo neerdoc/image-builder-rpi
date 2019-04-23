@@ -6,6 +6,15 @@ if [ ! -f /.dockerenv ]; then
   exit 1
 fi
 
+# Check that we have set TARGET_ARCH
+if [ -z $TARGET_ARCH ]; then
+  echo "ERROR: you need to set TARGET_ARCH!"
+  exit 2
+elif ! [[ "$TARGET_ARCH" == "armhf" || "$TARGET_ARCH" == "arm64" ]]; then
+  echo "ERROR: TARGET_ARCH must be 'armhf' or 'arm64'"
+  exit 2
+fi
+
 # get versions for software that needs to be installed
 # shellcheck disable=SC1091
 source /workspace/versions.config
@@ -13,12 +22,14 @@ source /workspace/versions.config
 ### setting up some important variables to control the build process
 
 # place to store our created sd-image file
-BUILD_RESULT_PATH="/workspace"
+BUILD_RESULT_PATH="/workspace/${TARGET_ARCH}"
+mkdir -p ${BUILD_RESULT_PATH}
 
 # place to build our sd-image
-BUILD_PATH="/build"
+BUILD_PATH="/build/${TARGET_ARCH}"
+mkdir build
 
-ROOTFS_TAR="rootfs-armhf-raspbian-${HYPRIOT_OS_VERSION}.tar.gz"
+ROOTFS_TAR="rootfs-${TARGET_ARCH}-raspbian-${HYPRIOT_OS_VERSION}.tar.gz"
 ROOTFS_TAR_PATH="${BUILD_RESULT_PATH}/${ROOTFS_TAR}"
 
 # Show CIRCLE_TAG in Circle builds
@@ -53,7 +64,11 @@ if [ ! -f "${ROOTFS_TAR_PATH}" ]; then
 fi
 
 # verify checksum of our root filesystem
-echo "${ROOTFS_TAR_CHECKSUM} ${ROOTFS_TAR_PATH}" | sha256sum -c -
+if [[ ${TARGET_ARCH} == 'armhf' ]]; then
+  echo "${ROOTFS_TAR_CHECKSUM} ${ROOTFS_TAR_PATH}" | sha256sum -c -
+else
+  echo "${ROOTFS_ARM64_TAR_CHECKSUM} ${ROOTFS_TAR_PATH}" | sha256sum -c -
+fi
 
 # extract root file system
 tar xf "${ROOTFS_TAR_PATH}" -C "${BUILD_PATH}"
@@ -115,4 +130,4 @@ cd ${BUILD_RESULT_PATH} && zip "${HYPRIOT_IMAGE_NAME}.zip" "${HYPRIOT_IMAGE_NAME
 cd ${BUILD_RESULT_PATH} && sha256sum "${HYPRIOT_IMAGE_NAME}.zip" > "${HYPRIOT_IMAGE_NAME}.zip.sha256" && cd -
 
 # test sd-image that we have built
-VERSION=${HYPRIOT_IMAGE_VERSION} rspec --format documentation --color ${BUILD_RESULT_PATH}/builder/test
+VERSION=${HYPRIOT_IMAGE_VERSION} rspec --format documentation --color ${BUILD_RESULT_PATH}/../builder/test

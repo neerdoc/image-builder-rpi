@@ -1,4 +1,4 @@
-#!/bin/bash
+${TARGET_ARCH}#!/bin/bash
 set -ex
 
 KEYSERVER="ha.pool.sks-keyservers.net"
@@ -99,7 +99,7 @@ DOCKERREPO_FPR=9DC858229FC7DD38854AE2D88D81803C0EBFCD88
 DOCKERREPO_KEY_URL=https://download.docker.com/linux/raspbian/gpg
 get_gpg "${DOCKERREPO_FPR}" "${DOCKERREPO_KEY_URL}"
 
-echo "deb [arch=armhf] https://download.docker.com/linux/raspbian stretch $DOCKER_CE_CHANNEL" > /etc/apt/sources.list.d/docker.list
+echo "deb [arch=${TARGET_ARCH}] https://download.docker.com/linux/raspbian stretch $DOCKER_CE_CHANNEL" > /etc/apt/sources.list.d/docker.list
 
 # set up hypriot rpi repository for raspbian specific packages
 echo 'deb https://packagecloud.io/Hypriot/rpi/raspbian/ stretch main' >> /etc/apt/sources.list.d/hypriot.list
@@ -219,7 +219,7 @@ ln -s /boot/meta-data /var/lib/cloud/seed/nocloud-net/meta-data
 rm -f /etc/network/interfaces.d/eth0
 
 # install docker-machine
-curl -sSL -o /usr/local/bin/docker-machine "https://github.com/docker/machine/releases/download/v${DOCKER_MACHINE_VERSION}/docker-machine-Linux-armhf"
+curl -sSL -o /usr/local/bin/docker-machine "https://github.com/docker/machine/releases/download/v${DOCKER_MACHINE_VERSION}/docker-machine-Linux-${TARGET_ARCH}"
 chmod +x /usr/local/bin/docker-machine
 
 # install bash completion for Docker Machine
