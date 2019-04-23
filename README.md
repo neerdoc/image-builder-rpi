@@ -59,11 +59,11 @@ compressed to `hypriotos-rpi-dirty.img.zip`.
 
 _NOTE:_ Before this step, choose which architecture your wish to build by setting the environmental variable *TARGET_ARCH* to _armhf_ or _arm64_! I.e.,
 ```bash
-export TARGET_ARCH=armhf_
+export TARGET_ARCH=armhf
 ```
 or
 ```bash
-export TARGET_ARCH=armhf_
+export TARGET_ARCH=arm64
 ```
 
 Now build the image.
