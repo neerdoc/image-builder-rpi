@@ -7,10 +7,10 @@ if [ ! -f /.dockerenv ]; then
 fi
 
 # Check that we have set TARGET_ARCH
-if [ -z $TARGET_ARCH ]; then
+if [ -z "${TARGET_ARCH}" ]; then
   echo "ERROR: you need to set TARGET_ARCH!"
   exit 2
-elif ! [[ "$TARGET_ARCH" == "armhf" || "$TARGET_ARCH" == "arm64" ]]; then
+elif ! [[ "${TARGET_ARCH}" == "armhf" || "${TARGET_ARCH}" == "arm64" ]]; then
   echo "ERROR: TARGET_ARCH must be 'armhf' or 'arm64'"
   exit 2
 fi
@@ -23,7 +23,7 @@ source /workspace/versions.config
 
 # place to store our created sd-image file
 BUILD_RESULT_PATH="/workspace/${TARGET_ARCH}"
-mkdir -p ${BUILD_RESULT_PATH}
+mkdir -p "${BUILD_RESULT_PATH}"
 
 # place to build our sd-image
 BUILD_PATH="/build/${TARGET_ARCH}"
@@ -55,8 +55,8 @@ IMAGE_PARTUUID_PREFIX=$(dd if="${BUILD_RESULT_PATH}/${HYPRIOT_IMAGE_NAME}" skip=
 export IMAGE_PARTUUID_PREFIX
 
 # create build directory for assembling our image filesystem
-rm -rf ${BUILD_PATH}
-mkdir ${BUILD_PATH}
+rm -rf "${BUILD_PATH}"
+mkdir "${BUILD_PATH}"
 
 # download our base root file system
 if [ ! -f "${ROOTFS_TAR_PATH}" ]; then
@@ -79,36 +79,36 @@ tar xf "${ROOTFS_TAR_PATH}" -C "${BUILD_PATH}"
 update-binfmts --enable qemu-arm
 
 # set up mount points for the pseudo filesystems
-mkdir -p ${BUILD_PATH}/{proc,sys,dev/pts}
+mkdir -p "${BUILD_PATH}/{proc,sys,dev/pts}"
 
-mount -o bind /dev ${BUILD_PATH}/dev
-mount -o bind /dev/pts ${BUILD_PATH}/dev/pts
-mount -t proc none ${BUILD_PATH}/proc
-mount -t sysfs none ${BUILD_PATH}/sys
+mount -o bind /dev "${BUILD_PATH}/dev"
+mount -o bind /dev/pts "${BUILD_PATH}/dev/pts"
+mount -t proc none "${BUILD_PATH}/proc"
+mount -t sysfs none "${BUILD_PATH}/sys"
 
 # modify/add image files directly
-cp -R /builder/files/* ${BUILD_PATH}/
+cp -R /builder/files/* "${BUILD_PATH}/"
 
 # make our build directory the current root
 # and install the Rasberry Pi firmware, kernel packages,
 # docker tools and some customizations
-chroot ${BUILD_PATH} /bin/bash < /builder/chroot-script.sh
+chroot "${BUILD_PATH}" /bin/bash < /builder/chroot-script.sh
 
 # unmount pseudo filesystems
-umount -l ${BUILD_PATH}/dev/pts
-umount -l ${BUILD_PATH}/dev
-umount -l ${BUILD_PATH}/proc
-umount -l ${BUILD_PATH}/sys
+umount -l "${BUILD_PATH}/dev/pts"
+umount -l "${BUILD_PATH}/dev"
+umount -l "${BUILD_PATH}/proc"
+umount -l "${BUILD_PATH}/sys"
 
 # package image filesytem into two tarballs - one for bootfs and one for rootfs
 # ensure that there are no leftover artifacts in the pseudo filesystems
-rm -rf ${BUILD_PATH}/{dev,sys,proc}/*
+rm -rf "${BUILD_PATH}"/{dev,sys,proc}/*
 
-tar -czf /image_with_kernel_boot.tar.gz -C ${BUILD_PATH}/boot .
-du -sh ${BUILD_PATH}/boot
-rm -Rf ${BUILD_PATH}/boot
-tar -czf /image_with_kernel_root.tar.gz -C ${BUILD_PATH} .
-du -sh ${BUILD_PATH}
+tar -czf /image_with_kernel_boot.tar.gz -C "${BUILD_PATH}/boot" .
+du -sh "${BUILD_PATH}/boot"
+rm -Rf "${BUILD_PATH}/boot"
+tar -czf /image_with_kernel_root.tar.gz -C "${BUILD_PATH}" .
+du -sh "${BUILD_PATH}"
 ls -alh /image_with_kernel_*.tar.gz
 
 # create the image and add root base filesystem
@@ -126,8 +126,8 @@ _EOF_
 umask 0000
 
 # compress image
-cd ${BUILD_RESULT_PATH} && zip "${HYPRIOT_IMAGE_NAME}.zip" "${HYPRIOT_IMAGE_NAME}"
-cd ${BUILD_RESULT_PATH} && sha256sum "${HYPRIOT_IMAGE_NAME}.zip" > "${HYPRIOT_IMAGE_NAME}.zip.sha256" && cd -
+cd "${BUILD_RESULT_PATH}" && zip "${HYPRIOT_IMAGE_NAME}.zip" "${HYPRIOT_IMAGE_NAME}"
+cd "${BUILD_RESULT_PATH}" && sha256sum "${HYPRIOT_IMAGE_NAME}.zip" > "${HYPRIOT_IMAGE_NAME}.zip.sha256" && cd -
 
 # test sd-image that we have built
-VERSION=${HYPRIOT_IMAGE_VERSION} rspec --format documentation --color ${BUILD_RESULT_PATH}/../builder/test
+VERSION="${HYPRIOT_IMAGE_VERSION}" rspec --format documentation --color "${BUILD_RESULT_PATH}/../builder/test"
