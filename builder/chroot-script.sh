@@ -1,4 +1,4 @@
-${TARGET_ARCH}#!/bin/bash
+#!/bin/bash
 set -ex
 
 KEYSERVER="ha.pool.sks-keyservers.net"
