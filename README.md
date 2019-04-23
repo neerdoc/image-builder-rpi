@@ -57,6 +57,8 @@ Operating System: Ubuntu 16.04.3 LTS
 From here you can just make the SD card image. The output will be written and
 compressed to `hypriotos-rpi-dirty.img.zip`.
 
+_NOTE:_ Before this step, choose which architecture your wish to build by setting the environmental variable *TARGET_ARCH* to _armhf_ or _arm64_! I.e., _export TARGET_ARCH=armhf_
+
 ```bash
 make sd-image
 ```
