@@ -19,7 +19,7 @@ jobs:
           name: Prepare artifacts
           command: |
             mkdir -p output
-            cp "$BUILD_ARCH"/hypriotos* output/
+            cp armhf/hypriotos* output/
 
       - store_artifacts:
           path: /home/circleci/project/output
